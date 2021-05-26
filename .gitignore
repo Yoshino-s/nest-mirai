@@ -35,9 +35,14 @@ lerna-debug.log*
 
 # data
 config/*.yml
+config/device.json
 !config/*.example.yml
 data/*/*/*
 
 !.gitkeep
 
 config.yml
+
+mirai/src/bots
+mirai/src/config
+mirai/src/data

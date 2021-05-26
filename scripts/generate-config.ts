@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import * as fs from "fs";
 import * as path_ from "path";
 
@@ -23,7 +24,8 @@ async function main() {
     generate("./config/AutoLogin.yml", (config_) => {
       const config = load(config_) as any;
       config.accounts[0].account = yamlConfig.qq;
-      config.accounts[0].password.value = yamlConfig.password;
+      config.accounts[0].password.kind = "MD5";
+      config.accounts[0].password.value = createHash("md5").update(yamlConfig.password).digest("hex");
       return dump(config);
     }),
     generate("./config/setting.yml", (config_) => {
