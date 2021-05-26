@@ -1,0 +1,12 @@
+version: "3"
+services:
+  mirai:
+    build: ./mirai
+    container_name: mirai
+    restart: always
+    ports:
+      - 14445:8080
+    volumes:
+      - ./config/AutoLogin.yml:/app/config/Console/AutoLogin.yml
+      - ./config/setting.yml:/app/config/net.mamoe.mirai-api-http/setting.yml
+      - ./data:/app/data

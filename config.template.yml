@@ -1,0 +1,14 @@
+commandPrefix: ["/", "#"]
+admin:
+  - 
+api:
+  host: localhost
+  port: 14445
+  authKey: 
+  enableWebsocket: true
+redis:
+  host: localhost
+  port: 6379
+  prefix: "mirai:"
+qq: 
+password: 

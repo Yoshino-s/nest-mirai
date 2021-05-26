@@ -1,0 +1,13 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "http.proxy": "http://host:7890/",
+  "http.proxyAuthorization": null,
+  "http.proxyStrictSSL": true,
+  "yaml.schemas": {
+    ".vscode/config.schema.json": ["/config.yml"]
+  },
+  "cSpell.words": [
+    "mirai",
+    "nestjs"
+  ]
+}
