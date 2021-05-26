@@ -36,6 +36,10 @@ async function main() {
       return dump(config);
     }),
   ]);
+  if(fs.existsSync("./device.json")) {
+    fs.mkdirSync(`./mirai/src/bots/${yamlConfig.qq}`, {recursive: true});
+    fs.copyFileSync("./device.json", `./mirai/src/bots/${yamlConfig.qq}/device.json`);
+  }
 }
 
 main();
