@@ -20,7 +20,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "generate": "ts-node src/generate-schema.ts && ts-node src/generate-config.ts",
+    "generate": "ts-node scripts/generate-schema.ts && ts-node scripts/generate-config.ts",
     "commit": "cz",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "release": "standard-version"
