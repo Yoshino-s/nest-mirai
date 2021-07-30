@@ -38,7 +38,7 @@ async function main() {
     generate("./docker-compose.yml", (config_) => {
       const config = load(config_) as any;
       if(fs.existsSync("./device.json")) {
-        config.services.mirai.volumes.push(`/app/bots/${yamlConfig.qq}/device.json:./device.json`);
+        config.services.mirai.volumes.push(`./device.json:/app/bots/${yamlConfig.qq}/device.json`);
       }
       return dump(config);
     }),
