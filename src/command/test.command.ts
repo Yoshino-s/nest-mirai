@@ -1,12 +1,14 @@
 import { HttpService, Inject, Injectable } from "@nestjs/common";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
-import { makeMessage } from "src/mirai/message.interface";
-import { ParsedCommand } from "src/mirai/mirai.service";
 import { Logger } from "winston";
 
 import { ApiService } from "../mirai/api.service";
-import { MiraiCommand } from "../mirai/command.abstract";
+import { MiraiCommand, MiraiCommandContext } from "../mirai/command.abstract";
 import { Command } from "../mirai/mirai.decorator";
+
+interface Session {
+  time: number;
+}
 @Injectable()
 @Command()
 export class TestCommand extends MiraiCommand {
@@ -17,7 +19,12 @@ export class TestCommand extends MiraiCommand {
   ) {
     super(logger);
   }
-  async trigger(message: ParsedCommand) {
-    return "";
+  async trigger(context: MiraiCommandContext<Session>) {
+    const a = context.message.arguments[0];
+    let t = await context.session.get("time") ?? 0;
+    if(a==="reset")
+      t = 0;
+    await context.session.set("time", t+1);
+    return `count: ${t}`;
   }
 }

@@ -6,6 +6,7 @@ import { AxiosRequestConfig } from "axios";
 import FormData from "form-data";
 import { isUndefined } from "lodash";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
+import { firstValueFrom } from "rxjs";
 import { ConfigInterface } from "src/config/config.interface";
 import { BotConfig } from "src/config/configuration";
 import { Logger } from "winston";
@@ -14,7 +15,7 @@ import ws from "ws";
 import { MiraiAPIError, MiraiAPIResponse, MiraiSessionConfig, MiraiEventEmitter, GroupConfig, GroupMemberInfo } from "./api.interface";
 import { log, processMiraiAPIResponse } from "./api.utils";
 import { BotInvitedJoinGroupRequestEvent, BotInvitedJoinGroupRequestEventResponse, MemberJoinRequestEvent, MemberJoinRequestEventResponse, MiraiEvent, NewFriendRequestEvent, NewFriendRequestEventResponse } from "./event.interface";
-import { Friend, Group, makeMessage, Member, MessageChain, MiraiChatMessage, Permission } from "./message.interface";
+import { Friend, Group, makeMessage, Member, MessageChain, MiraiChatMessage } from "./message.interface";
 
 @Injectable()
 export class ApiService extends (EventEmitter as { new(): MiraiEventEmitter }) implements OnModuleInit, OnApplicationShutdown {
@@ -53,7 +54,6 @@ export class ApiService extends (EventEmitter as { new(): MiraiEventEmitter }) i
       this.emit("ChatMessage", message);
     });
     this.logger.info("Mirai-api-http client initialized");
-
   }
   async onApplicationShutdown() {
     this.eventWsClient.close();
@@ -79,10 +79,10 @@ export class ApiService extends (EventEmitter as { new(): MiraiEventEmitter }) i
     this._sessionKey = value;
   }
   async get<T>(url: string, config?: AxiosRequestConfig) {
-    return await processMiraiAPIResponse(this.httpService.get<MiraiAPIResponse<T>>(url, config).toPromise());
+    return await processMiraiAPIResponse(firstValueFrom(this.httpService.get<MiraiAPIResponse<T>>(url, config)));
   }
   async post<T>(url: string, data?: any, config?: AxiosRequestConfig) {
-    return await processMiraiAPIResponse(this.httpService.post<MiraiAPIResponse<T>>(url, data, config).toPromise());
+    return await processMiraiAPIResponse(firstValueFrom(this.httpService.post<MiraiAPIResponse<T>>(url, data, config)));
   }
   async about() {
     const v = await this.get<{ data: { version: string; }; }>("/about");
@@ -322,10 +322,11 @@ export class ApiService extends (EventEmitter as { new(): MiraiEventEmitter }) i
     return v;
   }
 
-  async memberList() {
+  async memberList(target: number) {
     const v = await this.get<Member[] & { code: never }>("/memberList", {
       params: {
-        sessionKet: this.sessionKey,
+        sessionKey: this.sessionKey,
+        target,
       },
     });
     return v;

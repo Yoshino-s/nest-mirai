@@ -2,11 +2,10 @@ import { HttpService, Inject, Injectable } from "@nestjs/common";
 import * as netease from "NeteaseCloudMusicApi";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 import { makeMessage } from "src/mirai/message.interface";
-import { ParsedCommand } from "src/mirai/mirai.service";
 import { Logger } from "winston";
 
 import { ApiService } from "../mirai/api.service";
-import { MiraiCommand } from "../mirai/command.abstract";
+import { MiraiCommand, MiraiCommandContext } from "../mirai/command.abstract";
 import { Command } from "../mirai/mirai.decorator";
 
 
@@ -20,12 +19,12 @@ export class NeteaseCommand extends MiraiCommand {
   ) {
     super(logger);
   }
-  async trigger(message: ParsedCommand) {
-    const keyword = message.arguments[0];
+  async trigger(context: MiraiCommandContext) {
+    const keyword = context.message.arguments[0];
     if(!keyword) {
       return `Usage: ${this.command} keyword`;
     }
-    const o = message.arguments[1];
+    const o = context.message.arguments[1];
     const offset = parseInt(o) || 0;
     const resp = await netease.search({keywords: keyword});
     let song = (resp.body.result as any).songs[offset].id;

@@ -4,6 +4,7 @@ import { BotConfig } from "src/config/configuration";
 
 import { ApiService } from "./api.service";
 import { MiraiService } from "./mirai.service";
+import SessionService from "./session.service";
 
 @Global()
 @Module({})
@@ -20,9 +21,11 @@ export class MiraiModule {
           inject: [BotConfig.KEY],
         }),
       ],
-      providers: [MiraiService, ApiService],
+      providers: [
+        MiraiService, ApiService, SessionService,
+      ],
       exports: [
-        MiraiService, ApiService,
+        MiraiService, ApiService, SessionService,
       ],
     };
   }

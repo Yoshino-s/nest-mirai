@@ -1,11 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 import { makeMessage } from "src/mirai/message.interface";
-import { ParsedCommand } from "src/mirai/mirai.service";
 import { Logger } from "winston";
 
 import { ApiService } from "../mirai/api.service";
-import { MiraiCommand } from "../mirai/command.abstract";
+import { MiraiCommand, MiraiCommandContext } from "../mirai/command.abstract";
 import { Command } from "../mirai/mirai.decorator";
 
 
@@ -19,8 +18,8 @@ export class CTFTimeCommand extends MiraiCommand {
   ) {
     super(logger);
   }
-  trigger(message: ParsedCommand) {
-    const id = message.arguments[0];
+  async trigger(context: MiraiCommandContext) {
+    const id = context.message.arguments[0];
     if(!id) {
       return `Usage: ${this.command} id`;
     }

@@ -1,20 +1,22 @@
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import chalk from "chalk";
 
 import { MiraiAPIError, MiraiAPIResponse, MiraiAPIStatus } from "./api.interface";
 import { MessageChain, SingleMessage } from "./message.interface";
 
 export async function processMiraiAPIResponse<T>(resp: Promise<AxiosResponse<MiraiAPIResponse<T>>>) {
+  let r: AxiosResponse<MiraiAPIResponse<T>>;
   try {
-    const v = await resp;
-    if (v.data.code !== MiraiAPIStatus.SUCCESS) {
-      throw new MiraiAPIError(v.data.code, v.config.data, JSON.stringify(v.data));
-    } else {
-      return v.data;
-    }
+    r = await resp;
   } catch(e) {
-    console.log(e.response);
+    console.log(e);
     throw new MiraiAPIError(e.response?.data);
+  }
+  if (!Array.isArray(r.data) && r.data.code !== MiraiAPIStatus.SUCCESS) {
+    console.log(r.data);
+    throw new MiraiAPIError(r.data.code, r.config.data, JSON.stringify(r.data));
+  } else {
+    return r.data;
   }
 }
 

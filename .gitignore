@@ -37,6 +37,7 @@ lerna-debug.log*
 config/*.yml
 !config/*.example.yml
 data/*/*/*
+docker-compose.yml
 
 !.gitkeep
 

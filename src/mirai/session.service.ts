@@ -1,10 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { IsString } from "class-validator";
 import Redis from "ioredis";
 import { merge } from "lodash";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 import { RedisConfigInterface, SessionConfigInterface } from "src/config/config.interface";
-import { SessionConfig } from "src/config/configuration";
+import { RedisConfig, SessionConfig } from "src/config/configuration";
 import { Logger } from "winston";
 
 import { MiraiChatMessage } from "./message.interface";
@@ -20,27 +19,32 @@ interface MiraiSessionOption {
   expire: number;
 }
 
-export class MiraiSession {
-  private cache: Map<string, string> = new Map();
+export class MiraiSession<M = any> {
+  readonly cache: Map<keyof M, M[keyof M]> = new Map();
   constructor(
-    private readonly _get: (key: string) => Promise<string|null>,
-    private readonly _set: (key: string, value: string|null) => Promise<void>,
-    private readonly options: MiraiSessionOption,
+    readonly _get: (key: string) => Promise<string|null>,
+    readonly _set: (key: string, value: string, expire: number) => Promise<any>,
+    readonly options: MiraiSessionOption,
   ) {}
-  async get(key: string, mode?: SESSION_MODE) {
-    const m = mode ?? this.options.readMode;
-    let value = this.cache.get(key);
-    if(m===SESSION_MODE.THROUGH || !value) {
+  async get<K extends keyof M & string>(key: K, options?:Partial<MiraiSessionOption>): Promise<M[K]|undefined> {
+    const {readMode} = merge({}, this.options, options);
+    let value: any = this.cache.get(key);
+    if(readMode===SESSION_MODE.THROUGH || !value) {
       value = await this._get(key) ?? undefined;
-      if(value)
+      if(value) {
+        value = JSON.parse(value);
         this.cache.set(key, value);
+      }
     }
     return value;
   }
-  async set(key: string, value: string, mode?: SESSION_MODE, expire?: number) {
-
+  async set<K extends keyof M & string>(key: K, value: M[K], options?:Partial<MiraiSessionOption>) {
+    const {writeMode, expire} = merge({}, this.options, options);
+    const v = JSON.stringify(value);
     this.cache.set(key, value);
-
+    if(writeMode===SESSION_MODE.THROUGH) {
+      await this._set(key, v, expire);
+    }
   }
 }
 
@@ -49,7 +53,7 @@ export default class SessionService {
   redis: Redis.Redis;
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    @Inject(SessionConfig.KEY) readonly redisConfig: RedisConfigInterface,
+    @Inject(RedisConfig.KEY) readonly redisConfig: RedisConfigInterface,
     @Inject(SessionConfig.KEY) readonly sessionConfig: SessionConfigInterface,
   ) {
     this.redis = new Redis({
@@ -67,26 +71,19 @@ export default class SessionService {
         return `t${message.sender.group.id}-${message.sender.id}`;
     }
   }
-  async getSession(id: string, readMode: SESSION_MODE = SESSION_MODE.CACHE, writeMode: SESSION_MODE = SESSION_MODE.CACHE): Promise<Record<string, string>> {
-    let session = {};
-    const sessionStr = await this.redis.get(id) || "";
-    try {
-      session = JSON.parse(sessionStr);
-    } catch(e) {
-      //
-    }
-    return new Proxy<Record<string, string>>({}, {
-      get(target, p, receiver) {
-        console.log(target, p, receiver);
-        return Reflect.get(target, p, receiver);
-      },
-      set(target, p, v, receiver) {
-        console.log(target, p, v, receiver);
-        return Reflect.set(target, p, v, receiver);
-      },
-    });
+  getSession<M = any>(id: string, options?: Partial<MiraiSessionOption>): MiraiSession<M> {
+    const _get = (key: string) => this.redis.get(`${id}:${key}`);
+    const _set = (key: string, value: string, expire: number) => expire === -1 ? this.redis.set(`${id}:${key}`, value) : this.redis.setex(`${id}:${key}`, expire, value);
+    return new MiraiSession<M>(_get, _set, merge({}, {
+      readMode: SESSION_MODE.THROUGH,
+      writeMode: SESSION_MODE.THROUGH,
+      expire: this.sessionConfig.expire,
+    }, options));
   }
-  async saveSession(session: Record<string, string>, id?: string) {
-    //
+  async saveSession(id: string, session: MiraiSession) {
+    if(session.options.writeMode===SESSION_MODE.CACHE)
+      for(const k of session.cache) {
+        await session._set(k[0] as any, k[1], session.options.expire);
+      }
   }
 }

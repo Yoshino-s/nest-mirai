@@ -5,6 +5,12 @@ import { MaybePromise } from "../utils/type.utils";
 import { MessageChain } from "./message.interface";
 import { MIRAI_COMMAND_METADATA } from "./mirai.decorator";
 import { ParsedCommand } from "./mirai.service";
+import { MiraiSession } from "./session.service";
+
+export interface MiraiCommandContext<M = any> {
+  message: ParsedCommand;
+  session: MiraiSession<M>;
+}
 
 export abstract class MiraiCommand {
   get command(): string {
@@ -21,8 +27,9 @@ export abstract class MiraiCommand {
       this.logger = this.logger?.child({context: this.constructor.name});
     }
   }
-  onCommandRegister() {
-    //
-  }
-  abstract trigger(message: ParsedCommand): MaybePromise<MessageChain | string>;
+  abstract trigger(context: MiraiCommandContext): MaybePromise<MessageChain | string>;
+}
+
+export interface MiraiCommandOnCommandRegister {
+  onCommandRegister(): void;
 }

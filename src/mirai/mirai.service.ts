@@ -7,9 +7,10 @@ import { parseCmd } from "src/utils/parseCmd.util";
 
 import { ApiService } from "./api.service";
 import { isAt, plain } from "./api.utils";
-import { MiraiCommand } from "./command.abstract";
+import { MiraiCommand, MiraiCommandOnCommandRegister } from "./command.abstract";
 import { MiraiChatMessage } from "./message.interface";
 import { MIRAI_COMMAND_METADATA } from "./mirai.decorator";
+import SessionService from "./session.service";
 
 export interface ParsedCommand {
   message: MiraiChatMessage;
@@ -18,7 +19,7 @@ export interface ParsedCommand {
   arguments: string[];
 }
 
-
+const isImplementMiraiCommandOnCommandRegister = <T>(c: T): c is T&MiraiCommandOnCommandRegister => typeof (c as any).onCommandRegister === "function";
 
 @Injectable()
 export class MiraiService implements OnModuleInit {
@@ -28,7 +29,7 @@ export class MiraiService implements OnModuleInit {
     private readonly apiService: ApiService,
     private readonly moduleRef: ModuleRef,
     @Inject(BotConfig.KEY) private readonly config: ConfigInterface,
-
+    private readonly sessionService: SessionService,
   ) { }
   onModuleInit() {
     const container = (this.moduleRef as any).container as NestContainer;
@@ -46,7 +47,7 @@ export class MiraiService implements OnModuleInit {
     } else {
       const command = wrapper.instance;
       this.logger.log(`Load command ${command.command}`);
-      if (command.onCommandRegister) {
+      if (isImplementMiraiCommandOnCommandRegister(command)) {
         command.onCommandRegister();
       }
       if (this.commandMap.has(command.command)) {
@@ -60,13 +61,8 @@ export class MiraiService implements OnModuleInit {
     const { commandPrefix } = this.config;
     let prefix = "";
     const testMessage = (prefix: string) => (prefix === "AT") ? isAt(message.messageChain, this.config.qq) : text.startsWith(prefix);
-    if (typeof commandPrefix === "string") {
-      if (!testMessage(commandPrefix)) return;
-      prefix = commandPrefix;
-    } else {
-      if (!commandPrefix.some(v => testMessage(v) && (prefix = v))) return;
-    }
-    text = text.slice(prefix.length);
+    if (!commandPrefix.some(v => testMessage(v) && (prefix = v))) return;
+    text = prefix === "AT" ? text : text.slice(prefix.length);
     const cmd = parseCmd(text);
     const parsed: ParsedCommand = {
       message, prefix,
@@ -77,8 +73,14 @@ export class MiraiService implements OnModuleInit {
     if (!command)
       return;
     this.logger.verbose(`Trigger command ${command.command}`);
+    const sessionId = this.sessionService.getSessionId(message);
+    const session = this.sessionService.getSession(sessionId); 
     try {
-      const result = await command.trigger(parsed);
+      const result = await command.trigger({
+        message: parsed,
+        session,
+      });
+      this.sessionService.saveSession(sessionId, session);
       this.apiService.reply(result, message);
       return;
     } catch(e: unknown) {

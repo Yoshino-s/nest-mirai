@@ -1,11 +1,11 @@
 import { HttpService, Inject, Injectable } from "@nestjs/common";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
+import { firstValueFrom } from "rxjs";
 import { makeMessage } from "src/mirai/message.interface";
-import { ParsedCommand } from "src/mirai/mirai.service";
 import { Logger } from "winston";
 
 import { ApiService } from "../mirai/api.service";
-import { MiraiCommand } from "../mirai/command.abstract";
+import { MiraiCommand, MiraiCommandContext } from "../mirai/command.abstract";
 import { Command } from "../mirai/mirai.decorator";
 
 
@@ -19,16 +19,16 @@ export class XiaoaiCommand extends MiraiCommand {
   ) {
     super(logger);
   }
-  async trigger(message: ParsedCommand) {
-    const question = message.arguments[0];
+  async trigger(context: MiraiCommandContext) {
+    const question = context.message.arguments[0];
     if(!question) {
       return `Usage: ${this.command} question`;
     }
-    const mp3 = (await this.httpService.get("http://jinapi.52jintia.xyz/api/xatx.php", {
+    const mp3 = (await firstValueFrom(this.httpService.get("http://jinapi.52jintia.xyz/api/xatx.php", {
       params: {
         msg: question,
       },
-    }).toPromise()).data.mp3;
+    }))).data.mp3;
     if(!mp3) {
       return [
         makeMessage({

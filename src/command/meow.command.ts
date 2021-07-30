@@ -1,7 +1,6 @@
 import { HttpService, Inject, Injectable } from "@nestjs/common";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 import { makeMessage } from "src/mirai/message.interface";
-import { ParsedCommand } from "src/mirai/mirai.service";
 import { Logger } from "winston";
 
 import { ApiService } from "../mirai/api.service";
@@ -19,7 +18,7 @@ export class MeowCommand extends MiraiCommand {
   ) {
     super(logger);
   }
-  async trigger(message: ParsedCommand) {
+  async trigger() {
     return [
       makeMessage({
         type: "Image",

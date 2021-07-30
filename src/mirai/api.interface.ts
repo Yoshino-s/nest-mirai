@@ -27,6 +27,7 @@ export enum MiraiAPIStatus{
   BOT_MUTED = 20,
   MESSAGE_TOO_LONG = 30,
   BAD_REQUEST = 400,
+  INTERNAL_ERROR = 500,
 }
 
 export function getMessageFromStatusCode(code: MiraiAPIStatus) {
