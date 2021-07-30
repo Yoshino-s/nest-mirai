@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import { IsBoolean, IsNumber, IsOptional, IsString, MinLength, ValidateNested } from "class-validator";
+import { IsNumber, IsOptional, IsString, MinLength, ValidateNested } from "class-validator";
 
 
 /**
@@ -36,12 +36,6 @@ export class APIConfigInterface {
   @IsString()
   @MinLength(8)
   authKey: string = "keykeykey";
-  @IsNumber()
-  @IsOptional()
-  cacheSize?: number;
-  @IsBoolean()
-  @IsOptional()
-  enableWebsocket?: boolean;
 }
 
 export class SessionConfigInterface {

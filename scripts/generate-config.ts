@@ -30,15 +30,14 @@ async function main() {
     }),
     generate("./config/setting.yml", (config_) => {
       const config = load(config_) as any;
-      config.authKey = yamlConfig.api.authKey;
-      config.cacheSize = yamlConfig.api.cacheSize || 4096;
-      config.enableWebsocket = !!yamlConfig.api.enableWebsocket;
+      config.verifyKey = yamlConfig.api.authKey;
       return dump(config);
     }),
     generate("./docker-compose.yml", (config_) => {
       const config = load(config_) as any;
       if(fs.existsSync("./device.json")) {
         config.services.mirai.volumes.push(`./device.json:/app/bots/${yamlConfig.qq}/device.json`);
+        config.services.mirai.ports = [`${yamlConfig.api.port}:8000`];
       }
       return dump(config);
     }),
