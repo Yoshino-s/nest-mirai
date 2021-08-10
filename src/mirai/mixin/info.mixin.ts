@@ -1,5 +1,5 @@
 import { UserProfile } from "../interface/api.interface";
-import { Friend, Group, Member } from "../interface/message.interface";
+import { Friend, Group, Member } from "../interface/contact.interface";
 
 import { BaseMixin } from "./base.mixin";
 

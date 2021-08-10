@@ -69,6 +69,10 @@ export default class SessionService {
         return `g${message.sender.group.id}-${message.sender.id}`;
       case "TempMessage":
         return `t${message.sender.group.id}-${message.sender.id}`;
+      case "StrangerMessage":
+        return `s${message.sender.id}`;
+      case "OtherClientMessage":
+        return `o${message.sender.id}`;
     }
   }
   getSession<M = any>(id: string, options?: Partial<MiraiSessionOption>): MiraiSession<M> {

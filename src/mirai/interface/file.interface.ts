@@ -1,4 +1,4 @@
-import { Friend, Group } from "./message.interface";
+import { Friend, Group } from "./contact.interface";
 
 export interface FileObject {
   name: string;
