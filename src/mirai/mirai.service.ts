@@ -8,7 +8,7 @@ import { parseCmd } from "src/utils/parseCmd.util";
 import { ApiService } from "./api.service";
 import { isAt, plain } from "./api.utils";
 import { MiraiCommand, MiraiCommandOnCommandRegister } from "./command.abstract";
-import { MiraiChatMessage } from "./message.interface";
+import { MiraiChatMessage } from "./interface/message.interface";
 import { MIRAI_COMMAND_METADATA } from "./mirai.decorator";
 import SessionService from "./session.service";
 

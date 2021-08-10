@@ -7,6 +7,9 @@
     ".vscode/config.schema.json": ["/config.yml"]
   },
   "cSpell.words": [
+    "Migu",
+    "Netease",
+    "Relogin",
     "mirai",
     "nestjs"
   ]

@@ -6,7 +6,7 @@ import { RedisConfigInterface, SessionConfigInterface } from "src/config/config.
 import { RedisConfig, SessionConfig } from "src/config/configuration";
 import { Logger } from "winston";
 
-import { MiraiChatMessage } from "./message.interface";
+import { MiraiChatMessage } from "./interface/message.interface";
 
 export enum SESSION_MODE {
   CACHE,

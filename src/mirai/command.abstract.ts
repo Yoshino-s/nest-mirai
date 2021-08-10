@@ -2,7 +2,7 @@ import { Logger } from "winston";
 
 import { MaybePromise } from "../utils/type.utils";
 
-import { MessageChain } from "./message.interface";
+import { MessageChain } from "./interface/message.interface";
 import { MIRAI_COMMAND_METADATA } from "./mirai.decorator";
 import { ParsedCommand } from "./mirai.service";
 import { MiraiSession } from "./session.service";

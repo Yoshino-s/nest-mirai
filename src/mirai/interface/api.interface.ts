@@ -5,15 +5,17 @@ import StrictEventEmitter from "strict-event-emitter-types";
 import { MiraiEvent } from "./event.interface";
 import { MiraiChatMessage } from "./message.interface";
 
-
-export type MiraiAPIResponse<T> = {
-  code: MiraiAPIStatus;
-} & T;
-
-export interface MiraiSessionConfig {
-  cacheSize: number;
-  enableWebsocket: boolean;
+export interface WebSocketResponse<T = any> {
+  syncId: string;
+  data: T;
 }
+
+
+export type MiraiAPIResponse<T=any> = {
+  code: MiraiAPIStatus;
+  msg: string;
+  data: T;
+};
 
 export enum MiraiAPIStatus{
   SUCCESS = 0,
@@ -76,14 +78,8 @@ export function getMessageFromStatusCode(code: MiraiAPIStatus) {
 }
 
 export class MiraiAPIError extends Error {
-  constructor(statusCode: MiraiAPIStatus | string, req?: any, res?: any) {
-    if (typeof statusCode === "string") {
-      super(statusCode);
-    } else {
-      super(`[${statusCode} ${[statusCode]}]${getMessageFromStatusCode(statusCode)
-      }.${req ? ("\n Request: " + req) : ""
-      }${res ? ("\nResponse: " + res): ""}`);
-    }
+  constructor(resp: MiraiAPIResponse) {
+    super(`[${resp.code}]${getMessageFromStatusCode(resp.code)}${resp.msg ? `(${resp.msg})` : ""}`);
   }
 }
 
@@ -93,10 +89,11 @@ type Events = {
   [Key in MiraiChatMessage["type"]]: (message: Extract<MiraiChatMessage, { type: Key }>) => void;
 } & {
   ChatMessage: (message: MiraiChatMessage) => void;
+} & {
+  [K: string]: (data: MiraiAPIResponse) => void;
 }
 
 export type MiraiEventEmitter = StrictEventEmitter<EventEmitter, Events>;
-
 
 export type GroupConfig = {
   name: string;
@@ -111,4 +108,13 @@ export type GroupMemberInfo = {
   name: string;
   nick: string;
   specialTitle: string;
+};
+
+export type UserProfile = {
+  nickname: string,
+  email: string,
+  age: number,
+  level: number,
+  sign: string;
+  sex: string;
 };

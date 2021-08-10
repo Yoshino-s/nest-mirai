@@ -1,4 +1,4 @@
-import { Group, Member, Permission } from "./message.interface";
+import { Friend, Group, Member, Permission } from "./contact.interface";
 
 export interface BaseEvent {
   type: string;
@@ -23,20 +23,16 @@ export interface BotReloginEvent extends BaseEvent {
   type: "BotReloginEvent";
   qq: number;
 }
-export interface GroupRecallEvent extends BaseEvent {
-  type: "GroupRecallEvent";
-  authorId: number;
-  messageId: number;
-  time: number;
-  group: Group;
-  operator: Member | null;
+export interface FriendInputStatusChangedEvent extends BaseEvent {
+  type: "FriendInputStatusChangedEvent";
+  friend: Friend;
+  inputting: boolean;
 }
-export interface FriendRecallEvent extends BaseEvent {
-  type: "FriendRecallEvent";
-  authorId: number;
-  messageId: number;
-  time: number;
-  operator: number;
+export interface FriendNickChangedEvent extends BaseEvent {
+  type: "FriendNickChangedEvent";
+  friend: Friend;
+  from: string;
+  to: string;
 }
 export interface BotGroupPermissionChangeEvent extends BaseEvent {
   type: "BotGroupPermissionChangeEvent";
@@ -64,6 +60,21 @@ export interface BotLeaveEventActive extends BaseEvent {
 export interface BotLeaveEventKick extends BaseEvent {
   type: "BotLeaveEventKick";
   group: Group;
+}
+export interface GroupRecallEvent extends BaseEvent {
+  type: "GroupRecallEvent";
+  authorId: number;
+  messageId: number;
+  time: number;
+  group: Group;
+  operator: Member | null;
+}
+export interface FriendRecallEvent extends BaseEvent {
+  type: "FriendRecallEvent";
+  authorId: number;
+  messageId: number;
+  time: number;
+  operator: number;
 }
 export interface GroupNameChangeEvent extends BaseEvent {
   type: "GroupNameChangeEvent";
@@ -149,6 +160,12 @@ export interface MemberUnmuteEvent extends BaseEvent {
   member: Member;
   operator: Member | null;
 }
+export interface MemberHonorChangeEvent extends BaseEvent {
+  type: "MemberHonorChangeEvent";
+  member: Member;
+  action: "achieve" | "lose" | "gain";
+  honor: string;
+}
 export interface NewFriendRequestEvent extends BaseEvent  {
   type: "NewFriendRequestEvent";
   eventId: number;
@@ -208,14 +225,16 @@ export type MiraiEvent =
   | BotOfflineEventForce
   | BotOfflineEventDropped
   | BotReloginEvent
-  | GroupRecallEvent
-  | FriendRecallEvent
+  | FriendInputStatusChangedEvent
+  | FriendNickChangedEvent
   | BotGroupPermissionChangeEvent
   | BotMuteEvent
   | BotUnmuteEvent
   | BotJoinGroupEvent
   | BotLeaveEventActive
   | BotLeaveEventKick
+  | GroupRecallEvent
+  | FriendRecallEvent
   | GroupNameChangeEvent
   | GroupEntranceAnnouncementChangeEvent
   | GroupMuteAllEvent
@@ -230,9 +249,49 @@ export type MiraiEvent =
   | MemberPermissionChangeEvent
   | MemberMuteEvent
   | MemberUnmuteEvent
+  | MemberHonorChangeEvent
   | NewFriendRequestEvent
   | MemberJoinRequestEvent
   | BotInvitedJoinGroupRequestEvent
   | NudgeEvent;
 
 export type EventType = MiraiEvent["type"];
+
+export function isMiraiEvent(data: any): data is MiraiEvent {
+  return [
+    "BotOnlineEvent", 
+    "BotOfflineEventActive",
+    "BotOfflineEventForce",
+    "BotOfflineEventDropped",
+    "BotReloginEvent",
+    "FriendInputStatusChangedEvent",
+    "FriendNickChangedEvent",
+    "GroupRecallEvent",
+    "FriendRecallEvent",
+    "BotGroupPermissionChangeEvent",
+    "BotMuteEvent",
+    "BotUnmuteEvent",
+    "BotJoinGroupEvent",
+    "BotLeaveEventActive",
+    "BotLeaveEventKick",
+    "GroupNameChangeEvent",
+    "GroupEntranceAnnouncementChangeEvent",
+    "GroupMuteAllEvent",
+    "GroupAllowAnonymousChatEvent",
+    "GroupAllowConfessTalkEvent",
+    "GroupAllowMemberInviteEvent",
+    "MemberJoinEvent",
+    "MemberLeaveEventKick",
+    "MemberLeaveEventQuit",
+    "MemberCardChangeEvent",
+    "MemberSpecialTitleChangeEvent",
+    "MemberPermissionChangeEvent",
+    "MemberMuteEvent",
+    "MemberUnmuteEvent",
+    "MemberHonorChangeEvent",
+    "NewFriendRequestEvent",
+    "MemberJoinRequestEvent",
+    "BotInvitedJoinGroupRequestEvent",
+    "NudgeEvent",
+  ].includes(data.type);
+}

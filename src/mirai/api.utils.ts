@@ -1,24 +1,6 @@
-import { AxiosResponse } from "axios";
 import chalk from "chalk";
 
-import { MiraiAPIError, MiraiAPIResponse, MiraiAPIStatus } from "./api.interface";
-import { MessageChain, SingleMessage } from "./message.interface";
-
-export async function processMiraiAPIResponse<T>(resp: Promise<AxiosResponse<MiraiAPIResponse<T>>>) {
-  let r: AxiosResponse<MiraiAPIResponse<T>>;
-  try {
-    r = await resp;
-  } catch(e) {
-    console.log(e);
-    throw new MiraiAPIError(e.response?.data);
-  }
-  if (!Array.isArray(r.data) && r.data.code !== MiraiAPIStatus.SUCCESS) {
-    console.log(r.data);
-    throw new MiraiAPIError(r.data.code, r.config.data, JSON.stringify(r.data));
-  } else {
-    return r.data;
-  }
-}
+import { MessageChain, SingleMessage } from "./interface/message.interface";
 
 export function plain(message: MessageChain) {
   return message.reduce((p, o) => p + (o.type==="Plain" ? o.text : ""), "");

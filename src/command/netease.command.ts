@@ -1,7 +1,7 @@
 import { HttpService, Inject, Injectable } from "@nestjs/common";
 import * as netease from "NeteaseCloudMusicApi";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
-import { makeMessage } from "src/mirai/message.interface";
+import { makeMessage } from "src/mirai/interface/message.interface";
 import { Logger } from "winston";
 
 import { ApiService } from "../mirai/api.service";

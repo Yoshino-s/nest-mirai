@@ -1,22 +1,5 @@
-export type Permission = "OWNER" | "ADMINISTRATOR" | "MEMBER";
-export interface Group {
-  id: number;
-  name: string;
-  permission: Permission;
-}
-interface BaseUser {
-  id: number;
-}
-export interface Friend extends BaseUser {
-  nickname: string;
-  remark: string;
-}
-export interface Member extends BaseUser {
-  memberName: string;
-  permission: Permission;
-  group: Group;
-}
-export type User = Friend | Member;
+import { Friend, Member, OtherClient, User } from "./contact.interface";
+
 interface BaseSingleMessage {
   type: string;
 }
@@ -144,7 +127,7 @@ export type SingleMessage =
 export type MessageChain = Array<SingleMessage>;
 
 interface BaseChatMessage extends BaseSingleMessage {
-  type: "GroupMessage" | "TempMessage" | "FriendMessage";
+  type: "GroupMessage" | "TempMessage" | "FriendMessage" | "StrangerMessage" | "OtherClientMessage";
   messageChain: MessageChain & {
     0: Source;
   };
@@ -162,8 +145,20 @@ export interface TempMessage extends BaseChatMessage {
   type: "TempMessage";
   sender: Member;
 }
-export type MiraiChatMessage = GroupMessage | TempMessage | FriendMessage;
+export interface StrangerMessage extends BaseChatMessage {
+  type: "StrangerMessage";
+  sender: Friend;
+}
+export interface OtherClientMessage extends BaseChatMessage {
+  type: "OtherClientMessage";
+  sender: OtherClient;
+}
+export type MiraiChatMessage = GroupMessage | TempMessage | FriendMessage | StrangerMessage | OtherClientMessage;
 
 export function makeMessage<T extends SingleMessage>(msg: T): T {
   return msg;
+}
+
+export function isMiraiMessage(data: any): data is MiraiChatMessage {
+  return ["GroupMessage", "TempMessage", "FriendMessage", "StrangerMessage", "OtherClientMessage"].includes(data.type);
 }
